@@ -1,0 +1,95 @@
+.onboarding-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.onboarding-card {
+  width: 100%;
+  max-width: 960px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  box-shadow: var(--shadow-card);
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.onboarding-card__steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.onboarding-card__step--active {
+  color: var(--color-accent);
+}
+
+.onboarding-card__body {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  max-width: 900px;
+  align-items: flex-start;
+}
+
+.onboarding-card__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.onboarding-card__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-bottom: 12px;
+}
+
+.onboarding-card__legend {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.onboarding-card__selected {
+  padding: 14px 18px;
+  background: #fff;
+  border: 1px solid var(--color-input-border);
+  border-radius: 14px;
+}
+
+.onboarding-card__selected-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.onboarding-card__selected-value {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.onboarding-card__goal-row {
+  display: flex;
+  gap: 12px;
+}
+
+.onboarding-card__goal {
+  flex: 1;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid var(--color-input-border);
+  border-radius: 12px;
+  font-size: 14px;
+}

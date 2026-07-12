@@ -1,0 +1,121 @@
+.settings-page {
+  min-height: 100vh;
+  background: var(--color-card);
+}
+
+.settings-page__body {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.settings-page__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--color-input-border);
+  border-radius: 14px;
+}
+
+.settings-page__card {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid var(--color-input-border);
+  border-radius: 14px;
+}
+
+.settings-page__row-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.settings-page__row-value {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.settings-page__note {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+}
+
+.settings-page__change-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-accent);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-page__edit-form {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-page__edit-input {
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.settings-page__save-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-page__toggle {
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--color-border);
+  position: relative;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease;
+}
+
+.settings-page__toggle--on {
+  background: var(--color-accent);
+}
+
+.settings-page__toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: left 0.2s ease;
+}
+
+.settings-page__toggle--on .settings-page__toggle-knob {
+  left: 23px;
+}
+
+.settings-page__logout {
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px solid var(--color-input-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--color-danger);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
