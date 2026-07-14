@@ -1,30 +1,40 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppHeader from '../components/AppHeader'
+import { getMe } from '../api/userApi'
 import { DAILY_STATS, WEEKLY_STATS } from '../lib/mockData'
+import type { UserDto } from '../types'
 import './Stats.css'
 
 type Range = 'daily' | 'weekly'
 
-function summarize(minutesList: number[]) {
-  const totalMinutes = minutesList.reduce((sum, m) => sum + m, 0)
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
+function formatSeconds(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
   return `${hours}시간 ${minutes}분`
 }
 
 export default function Stats() {
   const [range, setRange] = useState<Range>('daily')
+  const [me, setMe] = useState<UserDto | null>(null)
+  const [error, setError] = useState<string | null>(null)
   const bars = range === 'daily' ? DAILY_STATS : WEEKLY_STATS
 
+  useEffect(() => {
+    getMe()
+      .then(setMe)
+      .catch(() => setError('통계 정보를 불러오지 못했습니다.'))
+  }, [])
+
   const maxMinutes = useMemo(() => Math.max(...bars.map((bar) => bar.minutes)), [bars])
-  const totalTime = useMemo(() => summarize(bars.map((bar) => bar.minutes)), [bars])
-  const completedSessions = range === 'daily' ? 8 : 26
-  const completionRate = range === 'daily' ? 80 : 74
+  const totalTime = me ? formatSeconds(range === 'daily' ? me.dailyStudyTime : me.weeklyStudyTime) : '-'
+  const completedSessions = me?.pomoComplete ?? 0
+  const completionRate = me && me.pomoTry > 0 ? Math.round((me.pomoComplete / me.pomoTry) * 100) : 0
 
   return (
     <div className="stats-page">
       <AppHeader />
       <div className="stats-page__body">
+        {error && <div className="stats-page__error">{error}</div>}
         <div className="stats-page__tabs">
           <button
             type="button"
@@ -48,7 +58,9 @@ export default function Stats() {
           </div>
           <div className="stats-page__card">
             <div className="stats-page__card-label">완주 세션 · 포인트</div>
-            <div className="stats-page__card-value">{completedSessions}회 · {completedSessions}P</div>
+            <div className="stats-page__card-value">
+              {completedSessions}회 · {me?.point ?? 0}P
+            </div>
           </div>
           <div className="stats-page__card">
             <div className="stats-page__card-label">세션 완주율</div>

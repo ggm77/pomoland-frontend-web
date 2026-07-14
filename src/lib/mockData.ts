@@ -1,31 +1,4 @@
-import { makeGrid } from './mockGrid'
 import type { RankingEntry, StatsBar } from '../types'
-
-export const MAP_COLS = 14
-export const MAP_ROWS = 8
-
-export function createMapTiles() {
-  return makeGrid(
-    MAP_COLS,
-    MAP_ROWS,
-    new Set(['2,2', '2,3', '3,2', '3,3', '3,4', '4,3', '4,4', '2,4']),
-    new Set(['9,1', '9,2', '10,1', '10,2', '10,3', '11,2', '8,5', '9,5']),
-    new Set(['2,1', '1,2', '1,3', '4,2', '5,3', '5,4', '4,5', '3,5']),
-  )
-}
-
-export const ONBOARDING_COLS = 12
-export const ONBOARDING_ROWS = 6
-
-export function createOnboardingTiles() {
-  return makeGrid(
-    ONBOARDING_COLS,
-    ONBOARDING_ROWS,
-    new Set(['6,2']),
-    new Set(['1,0', '2,0', '1,1', '9,4', '10,4', '10,5']),
-    new Set(['5,2', '7,2', '6,1', '6,3']),
-  )
-}
 
 export const DAILY_STATS: StatsBar[] = [
   { label: '월', minutes: 140 },

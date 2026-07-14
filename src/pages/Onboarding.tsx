@@ -1,18 +1,52 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TileGrid from '../components/TileGrid'
-import { ONBOARDING_COLS, createOnboardingTiles } from '../lib/mockData'
+import { getMapTiles } from '../api/mapApi'
+import { setSpawnPoint } from '../api/userApi'
+import { mapDtoToTiles } from '../lib/mapTransform'
 import type { Tile } from '../types'
 import './Onboarding.css'
 
 export default function Onboarding() {
   const navigate = useNavigate()
-  const tiles = useMemo(() => createOnboardingTiles(), [])
+  const [tiles, setTiles] = useState<Tile[]>([])
+  const [cols, setCols] = useState(0)
   const [selected, setSelected] = useState<Tile | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getMapTiles()
+      .then((map) => {
+        if (cancelled) return
+        setCols(map.sizeX)
+        setTiles(mapDtoToTiles(map, null))
+      })
+      .catch(() => {
+        if (!cancelled) setError('맵 정보를 불러오지 못했습니다.')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   function handleTileClick(tile: Tile) {
     if (tile.state !== 'empty') return
     setSelected(tile)
+  }
+
+  async function handleStart() {
+    if (!selected) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await setSpawnPoint(selected.col, selected.row)
+      navigate('/timer')
+    } catch {
+      setError('스폰 포인트 설정에 실패했습니다.')
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -27,7 +61,7 @@ export default function Onboarding() {
           <div className="onboarding-card__col">
             <div className="onboarding-card__label">공유 맵 미리보기</div>
             <TileGrid
-              cols={ONBOARDING_COLS}
+              cols={cols}
               tiles={tiles}
               tileSize={26}
               selectedKey={selected?.key}
@@ -65,13 +99,14 @@ export default function Onboarding() {
                 집중 <b>25</b>분 + 휴식 <b>5</b>분
               </div>
             </div>
+            {error && <div className="onboarding-card__error">{error}</div>}
             <button
               type="button"
               className="btn btn--primary"
-              disabled={!selected}
-              onClick={() => navigate('/timer')}
+              disabled={!selected || submitting}
+              onClick={handleStart}
             >
-              시작하기
+              {submitting ? '설정 중...' : '시작하기'}
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { startAppleLogin, startGoogleLogin } from '../lib/oauth'
 import './Auth.css'
 
 export default function Login() {
@@ -18,10 +19,10 @@ export default function Login() {
             최초 로그인 시 자동으로 회원가입 및 온보딩으로 이동합니다.
           </p>
           <div className="auth-card__actions">
-            <button type="button" className="btn btn--outline" onClick={() => navigate('/onboarding')}>
+            <button type="button" className="btn btn--outline" onClick={startGoogleLogin}>
               Google로 계속하기
             </button>
-            <button type="button" className="btn btn--outline" onClick={() => navigate('/onboarding')}>
+            <button type="button" className="btn btn--outline" onClick={startAppleLogin}>
               Apple로 계속하기
             </button>
           </div>
