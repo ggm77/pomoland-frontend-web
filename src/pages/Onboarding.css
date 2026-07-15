@@ -58,9 +58,38 @@
 
 .onboarding-card__legend {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   font-size: 12px;
   color: var(--color-text-muted);
+}
+
+.onboarding-card__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onboarding-card__legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--color-input-border);
+}
+
+.onboarding-card__legend-swatch--selected {
+  background: var(--color-tile-empty);
+  border: 2px solid var(--color-text);
+}
+
+.onboarding-card__legend-swatch--occupied {
+  background: var(--color-gold);
+  border-color: transparent;
+}
+
+.onboarding-card__legend-swatch--empty {
+  background: var(--color-tile-empty);
 }
 
 .onboarding-card__selected {

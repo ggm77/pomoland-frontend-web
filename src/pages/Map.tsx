@@ -183,10 +183,18 @@ export default function Map() {
             onTileClick={(tile) => setSelectedKey(tile.key)}
           />
           <div className="map-page__legend">
-            <span>■ 내 영토</span>
-            <span>■ 타 유저</span>
-            <span>□ 빈 타일</span>
-            <span>⬚ 점령 가능(인접)</span>
+            <span className="map-page__legend-item">
+              <span className="map-page__legend-swatch map-page__legend-swatch--mine" />내 영토
+            </span>
+            <span className="map-page__legend-item">
+              <span className="map-page__legend-swatch map-page__legend-swatch--other" />타 유저
+            </span>
+            <span className="map-page__legend-item">
+              <span className="map-page__legend-swatch map-page__legend-swatch--empty" />빈 타일
+            </span>
+            <span className="map-page__legend-item">
+              <span className="map-page__legend-swatch map-page__legend-swatch--capturable" />점령 가능(인접)
+            </span>
           </div>
         </div>
         <div className="map-page__panel">

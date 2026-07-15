@@ -135,6 +135,11 @@ export default function Timer() {
 
   const handleGiveUp = useCallback(async () => {
     setRunning(false)
+    if (phase === 'break') {
+      setPhase('focus')
+      setSecondsLeft(focusSeconds)
+      return
+    }
     const abandoningUuid = sessionUuid
     setSessionUuid(null)
     if (abandoningUuid) {
@@ -144,8 +149,8 @@ export default function Timer() {
         setError('세션 포기 처리에 실패했습니다.')
       }
     }
-    setSecondsLeft(phase === 'focus' ? focusSeconds : breakSeconds)
-  }, [sessionUuid, phase, focusSeconds, breakSeconds])
+    setSecondsLeft(focusSeconds)
+  }, [sessionUuid, phase, focusSeconds])
 
   useEffect(() => {
     if (!running || phase !== 'focus') return

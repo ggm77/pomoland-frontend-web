@@ -79,9 +79,18 @@ export default function Onboarding() {
               onTileClick={handleTileClick}
             />
             <div className="onboarding-card__legend">
-              <span>■ 선택 타일</span>
-              <span>□ 점유 타일</span>
-              <span>⬚ 빈 타일 — 선택 가능</span>
+              <span className="onboarding-card__legend-item">
+                <span className="onboarding-card__legend-swatch onboarding-card__legend-swatch--selected" />
+                선택 타일
+              </span>
+              <span className="onboarding-card__legend-item">
+                <span className="onboarding-card__legend-swatch onboarding-card__legend-swatch--occupied" />
+                점유 타일
+              </span>
+              <span className="onboarding-card__legend-item">
+                <span className="onboarding-card__legend-swatch onboarding-card__legend-swatch--empty" />
+                빈 타일 — 선택 가능
+              </span>
             </div>
           </div>
           <div className="onboarding-card__col">

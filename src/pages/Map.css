@@ -64,9 +64,43 @@
 
 .map-page__legend {
   display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   font-size: 12px;
   color: var(--color-text-secondary);
+}
+
+.map-page__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-page__legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1px solid var(--color-input-border);
+}
+
+.map-page__legend-swatch--mine {
+  background: var(--color-accent);
+  border-color: transparent;
+}
+
+.map-page__legend-swatch--other {
+  background: var(--color-gold);
+  border-color: transparent;
+}
+
+.map-page__legend-swatch--empty {
+  background: var(--color-tile-empty);
+}
+
+.map-page__legend-swatch--capturable {
+  background: transparent;
+  border: 2px dashed var(--color-accent);
 }
 
 .map-page__panel {
