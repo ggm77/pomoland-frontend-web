@@ -25,16 +25,39 @@
 }
 
 .timer-page__dial {
+  position: relative;
   width: 260px;
   height: 260px;
   border-radius: 50%;
   background: #fff;
-  border: 14px solid var(--color-accent);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 6px;
+}
+
+.timer-page__ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.timer-page__ring-track {
+  fill: none;
+  stroke: var(--color-input-border);
+  stroke-width: 18px;
+}
+
+.timer-page__ring-progress {
+  fill: none;
+  stroke: var(--color-accent);
+  stroke-width: 18px;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s linear;
 }
 
 .timer-page__time {
@@ -61,6 +84,17 @@
 
 .timer-page__actions .btn {
   padding: 14px 40px;
+}
+
+.timer-page__notice {
+  width: 100%;
+  max-width: 760px;
+  padding: 12px 18px;
+  background: var(--color-notice-bg);
+  border: 1px solid var(--color-notice-border);
+  border-radius: 12px;
+  font-size: 13px;
+  color: var(--color-notice-text);
 }
 
 .timer-page__complete {

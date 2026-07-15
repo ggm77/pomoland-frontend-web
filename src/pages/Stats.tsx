@@ -6,9 +6,9 @@ import './Stats.css'
 
 type Range = 'daily' | 'weekly'
 
-function formatSeconds(totalSeconds: number) {
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
+function formatMinutes(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
   return `${hours}시간 ${minutes}분`
 }
 
@@ -23,7 +23,7 @@ export default function Stats() {
       .catch(() => setError('통계 정보를 불러오지 못했습니다.'))
   }, [])
 
-  const totalTime = me ? formatSeconds(range === 'daily' ? me.dailyStudyTime : me.weeklyStudyTime) : '-'
+  const totalTime = me ? formatMinutes(range === 'daily' ? me.dailyStudyTime : me.weeklyStudyTime) : '-'
   const completedSessions = me?.pomoComplete ?? 0
   const completionRate = me && me.pomoTry > 0 ? Math.round((me.pomoComplete / me.pomoTry) * 100) : 0
 

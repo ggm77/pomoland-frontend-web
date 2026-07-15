@@ -6,9 +6,9 @@ import './Ranking.css'
 
 type RankingType = 'time' | 'tile'
 
-function formatSeconds(totalSeconds: number) {
-  const hours = Math.floor(totalSeconds / 3600)
-  const minutes = Math.floor((totalSeconds % 3600) / 60)
+function formatMinutes(totalMinutes: number) {
+  const hours = Math.floor(totalMinutes / 60)
+  const minutes = totalMinutes % 60
   return `${hours}시간 ${minutes}분`
 }
 
@@ -62,7 +62,7 @@ export default function Ranking() {
               <span className="ranking-page__rank">{index + 1}위</span>
               <span className="ranking-page__name">{entry.username}</span>
               <span className="ranking-page__tiles">타일 {entry.tileCount}</span>
-              <span className="ranking-page__time">{formatSeconds(entry.weeklyStudyTime)}</span>
+              <span className="ranking-page__time">{formatMinutes(entry.weeklyStudyTime)}</span>
             </div>
           ))}
         </div>

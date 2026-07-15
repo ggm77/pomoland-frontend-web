@@ -9,8 +9,12 @@ const DEFAULT_FOCUS_SECONDS = 25 * 60
 const DEFAULT_BREAK_SECONDS = 5 * 60
 const TOTAL_SESSIONS = 4
 const HEARTBEAT_INTERVAL_MS = 15_000
+const AWAY_ABANDON_MS = 5_000
 
 type Phase = 'focus' | 'break'
+
+const DIAL_RADIUS = 121
+const DIAL_CIRCUMFERENCE = 2 * Math.PI * DIAL_RADIUS
 
 function formatTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60)
@@ -31,6 +35,7 @@ export default function Timer() {
   const [showComplete, setShowComplete] = useState(false)
   const [sessionUuid, setSessionUuid] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [hidden, setHidden] = useState(document.hidden)
   const intervalRef = useRef<number | null>(null)
   const heartbeatRef = useRef<number | null>(null)
 
@@ -74,14 +79,22 @@ export default function Timer() {
   }, [running])
 
   useEffect(() => {
-    if (!running || phase !== 'focus' || !sessionUuid) return
+    function handleVisibilityChange() {
+      setHidden(document.hidden)
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  useEffect(() => {
+    if (!running || phase !== 'focus' || !sessionUuid || hidden) return
     heartbeatRef.current = window.setInterval(() => {
       heartbeatSession(sessionUuid).catch(() => {})
     }, HEARTBEAT_INTERVAL_MS)
     return () => {
       if (heartbeatRef.current !== null) window.clearInterval(heartbeatRef.current)
     }
-  }, [running, phase, sessionUuid])
+  }, [running, phase, sessionUuid, hidden])
 
   useEffect(() => {
     if (secondsLeft !== 0 || !running) return
@@ -102,11 +115,8 @@ export default function Timer() {
     }
   }, [secondsLeft, running, phase, sessionUuid, focusSeconds, refreshMe])
 
-  async function handleStartPause() {
-    if (running) {
-      setRunning(false)
-      return
-    }
+  async function handleStart() {
+    if (running) return
     if (phase === 'focus' && !sessionUuid) {
       try {
         setError(null)
@@ -124,7 +134,7 @@ export default function Timer() {
     setRunning(true)
   }
 
-  async function handleGiveUp() {
+  const handleGiveUp = useCallback(async () => {
     setRunning(false)
     const abandoningUuid = sessionUuid
     setSessionUuid(null)
@@ -136,7 +146,29 @@ export default function Timer() {
       }
     }
     setSecondsLeft(phase === 'focus' ? focusSeconds : breakSeconds)
-  }
+  }, [sessionUuid, phase, focusSeconds, breakSeconds])
+
+  useEffect(() => {
+    if (!running) return
+    let timeoutId: number | null = null
+
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        timeoutId = window.setTimeout(() => {
+          handleGiveUp()
+        }, AWAY_ABANDON_MS)
+      } else if (timeoutId !== null) {
+        window.clearTimeout(timeoutId)
+        timeoutId = null
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (timeoutId !== null) window.clearTimeout(timeoutId)
+    }
+  }, [running, handleGiveUp])
 
   function handleContinueFocus() {
     setShowComplete(false)
@@ -144,6 +176,10 @@ export default function Timer() {
     setSecondsLeft(breakSeconds)
     setRunning(true)
   }
+
+  const phaseTotalSeconds = phase === 'focus' ? focusSeconds : breakSeconds
+  const dialProgress = phaseTotalSeconds > 0 ? secondsLeft / phaseTotalSeconds : 0
+  const dialDashOffset = DIAL_CIRCUMFERENCE * (1 - dialProgress)
 
   return (
     <div className="timer-page">
@@ -158,6 +194,17 @@ export default function Timer() {
           </span>
         </div>
         <div className="timer-page__dial">
+          <svg className="timer-page__ring" viewBox="0 0 260 260">
+            <circle className="timer-page__ring-track" cx="130" cy="130" r={DIAL_RADIUS} />
+            <circle
+              className="timer-page__ring-progress"
+              cx="130"
+              cy="130"
+              r={DIAL_RADIUS}
+              strokeDasharray={DIAL_CIRCUMFERENCE}
+              strokeDashoffset={dialDashOffset}
+            />
+          </svg>
           <div className="timer-page__time">{formatTime(secondsLeft)}</div>
           <div className="timer-page__phase">
             {phase === 'focus' ? '집중 중' : '휴식 중'} ({cycleSession}/{TOTAL_SESSIONS})
@@ -165,13 +212,18 @@ export default function Timer() {
         </div>
         {error && <div className="timer-page__error">{error}</div>}
         <div className="timer-page__actions">
-          <button type="button" className="btn btn--primary" onClick={handleStartPause}>
-            {running ? '일시정지' : '시작'}
+          <button type="button" className="btn btn--primary" onClick={handleStart} disabled={running}>
+            시작
           </button>
           <button type="button" className="btn btn--outline" onClick={handleGiveUp}>
             포기
           </button>
         </div>
+        {running && (
+          <div className="timer-page__notice">
+            화면 이탈 감지 — 5초 이내에 돌아오지 않으면 이번 세션은 자동으로 포기 처리됩니다.
+          </div>
+        )}
 
         {showComplete && (
           <div className="timer-page__complete">
