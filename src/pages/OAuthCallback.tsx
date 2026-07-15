@@ -67,7 +67,9 @@ export default function OAuthCallback({ provider }: OAuthCallbackProps) {
       <div className="auth-card">
         <div className="auth-card__inner">
           <div className="auth-card__brand">
-            <div className="auth-card__logo">🔥</div>
+            <div className="auth-card__logo-frame">
+              <img className="auth-card__logo" src="/logo2.svg" alt="뽀모도로 땅따먹기" />
+            </div>
             <div className="auth-card__title">뽀모도로 땅따먹기</div>
           </div>
           {error ? (

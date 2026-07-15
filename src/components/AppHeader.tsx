@@ -13,7 +13,10 @@ export default function AppHeader() {
   return (
     <header className="app-header">
       <div className="app-header__left">
-        <div className="app-header__logo">뽀모도로 땅따먹기</div>
+        <div className="app-header__logo">
+          <img className="app-header__logo-icon" src="/logo2.svg" alt="" />
+          <span>뽀모도로 땅따먹기</span>
+        </div>
         <nav className="app-header__nav">
           {NAV_ITEMS.map((item) => (
             <NavLink
