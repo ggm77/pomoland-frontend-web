@@ -7,6 +7,14 @@ import { mapDtoToTiles } from '../lib/mapTransform'
 import type { Tile } from '../types'
 import './Onboarding.css'
 
+const SESSION_STEP_MINUTES = 5
+
+function roundToStep(value: number) {
+  if (Number.isNaN(value)) return SESSION_STEP_MINUTES
+  const rounded = Math.round(value / SESSION_STEP_MINUTES) * SESSION_STEP_MINUTES
+  return Math.max(SESSION_STEP_MINUTES, rounded)
+}
+
 export default function Onboarding() {
   const navigate = useNavigate()
   const [tiles, setTiles] = useState<Tile[]>([])
@@ -44,7 +52,7 @@ export default function Onboarding() {
     setError(null)
     try {
       await setSpawnPoint(selected.col, selected.row)
-      await putMySettings({ studyTime, restTime })
+      await putMySettings({ studyTime: roundToStep(studyTime), restTime: roundToStep(restTime) })
       navigate('/timer')
     } catch {
       setError('설정 저장에 실패했습니다.')
@@ -91,10 +99,12 @@ export default function Onboarding() {
                 <label className="onboarding-card__session-field">
                   <input
                     type="number"
-                    min={1}
+                    min={SESSION_STEP_MINUTES}
+                    step={SESSION_STEP_MINUTES}
                     className="input onboarding-card__session-input"
                     value={studyTime}
                     onChange={(event) => setStudyTime(Number(event.target.value))}
+                    onBlur={(event) => setStudyTime(roundToStep(Number(event.target.value)))}
                   />
                   분 집중
                 </label>
@@ -102,10 +112,12 @@ export default function Onboarding() {
                 <label className="onboarding-card__session-field">
                   <input
                     type="number"
-                    min={1}
+                    min={SESSION_STEP_MINUTES}
+                    step={SESSION_STEP_MINUTES}
                     className="input onboarding-card__session-input"
                     value={restTime}
                     onChange={(event) => setRestTime(Number(event.target.value))}
+                    onBlur={(event) => setRestTime(roundToStep(Number(event.target.value)))}
                   />
                   분 휴식
                 </label>

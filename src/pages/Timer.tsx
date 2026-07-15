@@ -7,7 +7,6 @@ import './Timer.css'
 
 const DEFAULT_FOCUS_SECONDS = 25 * 60
 const DEFAULT_BREAK_SECONDS = 5 * 60
-const TOTAL_SESSIONS = 4
 const HEARTBEAT_INTERVAL_MS = 15_000
 const AWAY_ABANDON_MS = 5_000
 
@@ -30,7 +29,6 @@ export default function Timer() {
   const [secondsLeft, setSecondsLeft] = useState(DEFAULT_FOCUS_SECONDS)
   const [running, setRunning] = useState(false)
   const [completedToday, setCompletedToday] = useState(0)
-  const [cycleSession, setCycleSession] = useState(0)
   const [points, setPoints] = useState(0)
   const [showComplete, setShowComplete] = useState(false)
   const [sessionUuid, setSessionUuid] = useState<string | null>(null)
@@ -98,7 +96,6 @@ export default function Timer() {
 
   useEffect(() => {
     if (secondsLeft !== 0 || !running) return
-    setRunning(false)
     if (phase === 'focus') {
       const finishingUuid = sessionUuid
       setSessionUuid(null)
@@ -107,13 +104,15 @@ export default function Timer() {
           .then(() => refreshMe())
           .catch(() => setError('세션 완료 처리에 실패했습니다.'))
       }
-      setCycleSession((prev) => Math.min(prev + 1, TOTAL_SESSIONS))
       setShowComplete(true)
+      setPhase('break')
+      setSecondsLeft(breakSeconds)
     } else {
+      setRunning(false)
       setPhase('focus')
       setSecondsLeft(focusSeconds)
     }
-  }, [secondsLeft, running, phase, sessionUuid, focusSeconds, refreshMe])
+  }, [secondsLeft, running, phase, sessionUuid, focusSeconds, breakSeconds, refreshMe])
 
   async function handleStart() {
     if (running) return
@@ -170,11 +169,8 @@ export default function Timer() {
     }
   }, [running, handleGiveUp])
 
-  function handleContinueFocus() {
+  function handleDismissComplete() {
     setShowComplete(false)
-    setPhase('break')
-    setSecondsLeft(breakSeconds)
-    setRunning(true)
   }
 
   const phaseTotalSeconds = phase === 'focus' ? focusSeconds : breakSeconds
@@ -206,9 +202,7 @@ export default function Timer() {
             />
           </svg>
           <div className="timer-page__time">{formatTime(secondsLeft)}</div>
-          <div className="timer-page__phase">
-            {phase === 'focus' ? '집중 중' : '휴식 중'} ({cycleSession}/{TOTAL_SESSIONS})
-          </div>
+          <div className="timer-page__phase">{phase === 'focus' ? '집중 중' : '휴식 중'}</div>
         </div>
         {error && <div className="timer-page__error">{error}</div>}
         <div className="timer-page__actions">
@@ -228,13 +222,13 @@ export default function Timer() {
         {showComplete && (
           <div className="timer-page__complete">
             <div className="timer-page__complete-title">세션 완주! 타일 포인트 +1</div>
-            <div className="timer-page__complete-desc">보유 포인트 {points}P</div>
+            <div className="timer-page__complete-desc">보유 포인트 {points}P · 휴식을 시작합니다</div>
             <div className="timer-page__complete-actions">
               <button type="button" className="btn btn--primary" onClick={() => navigate('/map')}>
                 맵으로 이동
               </button>
-              <button type="button" className="btn btn--ghost" onClick={handleContinueFocus}>
-                계속 집중
+              <button type="button" className="btn btn--ghost" onClick={handleDismissComplete}>
+                확인
               </button>
             </div>
           </div>

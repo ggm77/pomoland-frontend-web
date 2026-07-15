@@ -5,6 +5,14 @@ import { deleteMe, getMe, getMySettings, putMySettings, updateMe } from '../api/
 import { clearStoredTokens } from '../lib/tokenStorage'
 import './Settings.css'
 
+const SESSION_STEP_MINUTES = 5
+
+function roundToStep(value: number) {
+  if (Number.isNaN(value)) return SESSION_STEP_MINUTES
+  const rounded = Math.round(value / SESSION_STEP_MINUTES) * SESSION_STEP_MINUTES
+  return Math.max(SESSION_STEP_MINUTES, rounded)
+}
+
 export default function Settings() {
   const navigate = useNavigate()
   const [nickname, setNickname] = useState('')
@@ -48,7 +56,10 @@ export default function Settings() {
   async function handleSessionSubmit(event: FormEvent) {
     event.preventDefault()
     try {
-      const settings = await putMySettings({ studyTime: draftStudyTime, restTime: draftRestTime })
+      const settings = await putMySettings({
+        studyTime: roundToStep(draftStudyTime),
+        restTime: roundToStep(draftRestTime),
+      })
       setStudyTime(settings.studyTime)
       setRestTime(settings.restTime)
       setEditingSession(false)
@@ -116,18 +127,22 @@ export default function Settings() {
             <form className="settings-page__edit-form" onSubmit={handleSessionSubmit}>
               <input
                 type="number"
-                min={1}
+                min={SESSION_STEP_MINUTES}
+                step={SESSION_STEP_MINUTES}
                 className="input settings-page__edit-input"
                 value={draftStudyTime}
                 onChange={(event) => setDraftStudyTime(Number(event.target.value))}
+                onBlur={(event) => setDraftStudyTime(roundToStep(Number(event.target.value)))}
               />
               <span>분 집중 +</span>
               <input
                 type="number"
-                min={1}
+                min={SESSION_STEP_MINUTES}
+                step={SESSION_STEP_MINUTES}
                 className="input settings-page__edit-input"
                 value={draftRestTime}
                 onChange={(event) => setDraftRestTime(Number(event.target.value))}
+                onBlur={(event) => setDraftRestTime(roundToStep(Number(event.target.value)))}
               />
               <span>분 휴식</span>
               <button type="submit" className="settings-page__save-btn">
