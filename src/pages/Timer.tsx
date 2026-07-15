@@ -36,6 +36,7 @@ export default function Timer() {
   const [hidden, setHidden] = useState(document.hidden)
   const intervalRef = useRef<number | null>(null)
   const heartbeatRef = useRef<number | null>(null)
+  const phaseEndAtRef = useRef<number | null>(null)
 
   const refreshMe = useCallback(async () => {
     try {
@@ -68,9 +69,13 @@ export default function Timer() {
 
   useEffect(() => {
     if (!running) return
-    intervalRef.current = window.setInterval(() => {
-      setSecondsLeft((prev) => (prev <= 1 ? 0 : prev - 1))
-    }, 1000)
+    function tick() {
+      if (phaseEndAtRef.current === null) return
+      const remaining = Math.max(0, Math.round((phaseEndAtRef.current - Date.now()) / 1000))
+      setSecondsLeft(remaining)
+    }
+    tick()
+    intervalRef.current = window.setInterval(tick, 1000)
     return () => {
       if (intervalRef.current !== null) window.clearInterval(intervalRef.current)
     }
@@ -79,10 +84,14 @@ export default function Timer() {
   useEffect(() => {
     function handleVisibilityChange() {
       setHidden(document.hidden)
+      if (!document.hidden && running && phaseEndAtRef.current !== null) {
+        const remaining = Math.max(0, Math.round((phaseEndAtRef.current - Date.now()) / 1000))
+        setSecondsLeft(remaining)
+      }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
-  }, [])
+  }, [running])
 
   useEffect(() => {
     if (!running || phase !== 'focus' || !sessionUuid || hidden) return
@@ -107,6 +116,7 @@ export default function Timer() {
       setShowComplete(true)
       setPhase('break')
       setSecondsLeft(breakSeconds)
+      phaseEndAtRef.current = Date.now() + breakSeconds * 1000
     } else {
       setRunning(false)
       setPhase('focus')
@@ -125,6 +135,7 @@ export default function Timer() {
           (new Date(session.endAt).getTime() - new Date(session.startAt).getTime()) / 1000,
         )
         setSecondsLeft(totalSeconds > 0 ? totalSeconds : focusSeconds)
+        phaseEndAtRef.current = new Date(session.endAt).getTime()
       } catch {
         setError('세션 시작에 실패했습니다.')
         return
