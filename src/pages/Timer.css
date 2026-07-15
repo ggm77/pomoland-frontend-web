@@ -37,6 +37,10 @@
   gap: 6px;
 }
 
+.timer-page__dial--break {
+  --timer-phase-color: #2f9e5c;
+}
+
 .timer-page__ring {
   position: absolute;
   inset: 0;
@@ -54,21 +58,24 @@
 
 .timer-page__ring-progress {
   fill: none;
-  stroke: var(--color-accent);
+  stroke: var(--timer-phase-color, var(--color-accent));
   stroke-width: 18px;
   stroke-linecap: round;
-  transition: stroke-dashoffset 1s linear;
+  transition:
+    stroke-dashoffset 1s linear,
+    stroke 0.3s ease;
 }
 
 .timer-page__time {
   font-size: 44px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
+  color: var(--timer-phase-color, inherit);
 }
 
 .timer-page__phase {
   font-size: 13px;
-  color: var(--color-text-muted);
+  color: var(--timer-phase-color, var(--color-text-muted));
   font-weight: 700;
 }
 
@@ -132,4 +139,35 @@
   flex: 1;
   padding: 12px;
   font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .timer-page__body {
+    padding: 20px 16px;
+    gap: 20px;
+  }
+
+  .timer-page__stats {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .timer-page__dial {
+    width: 220px;
+    height: 220px;
+  }
+
+  .timer-page__time {
+    font-size: 36px;
+  }
+
+  .timer-page__actions {
+    width: 100%;
+  }
+
+  .timer-page__actions .btn {
+    flex: 1;
+    padding: 14px 20px;
+  }
 }

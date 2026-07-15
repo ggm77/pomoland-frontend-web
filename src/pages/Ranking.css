@@ -67,6 +67,10 @@
 
 .ranking-page__name {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .ranking-page__tiles {
@@ -83,4 +87,23 @@
   font-size: 12px;
   color: var(--color-text-muted);
   text-align: center;
+}
+
+@media (max-width: 640px) {
+  .ranking-page__body {
+    padding: 16px;
+  }
+
+  .ranking-page__row {
+    padding: 14px 16px;
+    gap: 8px;
+  }
+
+  .ranking-page__rank {
+    width: 36px;
+  }
+
+  .ranking-page__time {
+    width: auto;
+  }
 }

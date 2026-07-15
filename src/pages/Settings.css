@@ -58,6 +58,8 @@
 
 .settings-page__edit-form {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
 }
 
@@ -107,4 +109,15 @@
 .settings-page__error {
   font-size: 12px;
   color: #d64545;
+}
+
+@media (max-width: 640px) {
+  .settings-page__body {
+    padding: 16px;
+  }
+
+  .settings-page__row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }

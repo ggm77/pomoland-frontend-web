@@ -67,6 +67,7 @@ export default function Map() {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [ownerNames, setOwnerNames] = useState<Record<number, string>>({})
+  const [refreshing, setRefreshing] = useState(false)
 
   const refresh = useCallback(async (userId: number) => {
     try {
@@ -79,6 +80,16 @@ export default function Map() {
       setError('맵 정보를 불러오지 못했습니다.')
     }
   }, [])
+
+  async function handleManualRefresh() {
+    if (myUserId === null || refreshing) return
+    setRefreshing(true)
+    try {
+      await refresh(myUserId)
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   useEffect(() => {
     let cancelled = false
@@ -153,6 +164,14 @@ export default function Map() {
             </div>
             <div className="map-page__updated">
               10초마다 자동 갱신 · 마지막 갱신 {lastUpdated ? formatClock(lastUpdated) : '-'}
+              <button
+                type="button"
+                className="map-page__refresh-btn"
+                onClick={handleManualRefresh}
+                disabled={refreshing || myUserId === null}
+              >
+                {refreshing ? '새로고침 중...' : '새로고침'}
+              </button>
             </div>
           </div>
           {error && <div className="map-page__error">{error}</div>}

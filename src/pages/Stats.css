@@ -64,3 +64,13 @@
 .stats-page__card-value--accent {
   color: var(--color-accent);
 }
+
+@media (max-width: 640px) {
+  .stats-page__body {
+    padding: 16px;
+  }
+
+  .stats-page__summary {
+    flex-direction: column;
+  }
+}

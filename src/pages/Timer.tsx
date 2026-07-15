@@ -148,7 +148,7 @@ export default function Timer() {
   }, [sessionUuid, phase, focusSeconds, breakSeconds])
 
   useEffect(() => {
-    if (!running) return
+    if (!running || phase !== 'focus') return
     let timeoutId: number | null = null
 
     function handleVisibilityChange() {
@@ -167,7 +167,7 @@ export default function Timer() {
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       if (timeoutId !== null) window.clearTimeout(timeoutId)
     }
-  }, [running, handleGiveUp])
+  }, [running, phase, handleGiveUp])
 
   function handleDismissComplete() {
     setShowComplete(false)
@@ -189,7 +189,7 @@ export default function Timer() {
             보유 <b>{points}P</b>
           </span>
         </div>
-        <div className="timer-page__dial">
+        <div className={`timer-page__dial${phase === 'break' ? ' timer-page__dial--break' : ''}`}>
           <svg className="timer-page__ring" viewBox="0 0 260 260">
             <circle className="timer-page__ring-track" cx="130" cy="130" r={DIAL_RADIUS} />
             <circle
@@ -213,7 +213,7 @@ export default function Timer() {
             포기
           </button>
         </div>
-        {running && (
+        {running && phase === 'focus' && (
           <div className="timer-page__notice">
             화면 이탈 감지 — 5초 이내에 돌아오지 않으면 이번 세션은 자동으로 포기 처리됩니다.
           </div>

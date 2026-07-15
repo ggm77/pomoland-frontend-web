@@ -103,3 +103,25 @@
   font-size: 12px;
   color: #d64545;
 }
+
+@media (max-width: 640px) {
+  .onboarding-page {
+    padding: 20px 12px;
+  }
+
+  .onboarding-card {
+    padding: 24px 16px;
+    gap: 20px;
+  }
+
+  .onboarding-card__steps {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  .onboarding-card__body {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 24px;
+  }
+}

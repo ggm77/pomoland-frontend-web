@@ -53,3 +53,9 @@
   outline: 2px solid var(--color-text);
   outline-offset: 1px;
 }
+
+@media (max-width: 640px) {
+  .tile-grid {
+    max-height: 45vh;
+  }
+}
