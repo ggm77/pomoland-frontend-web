@@ -157,7 +157,7 @@ export default function Map() {
     <div className="map-page">
       <AppHeader />
       <div className="map-page__body">
-        <div className="map-page__main">
+        <div className="map-page__header">
           <div className="map-page__toolbar">
             <div className="map-page__points">
               보유 <b>{points}P</b>
@@ -175,6 +175,8 @@ export default function Map() {
             </div>
           </div>
           {error && <div className="map-page__error">{error}</div>}
+        </div>
+        <div className="map-page__main">
           <TileGrid
             cols={cols}
             tiles={tiles}
