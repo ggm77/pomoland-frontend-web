@@ -47,10 +47,6 @@ export default function Login() {
               Apple로 계속하기
             </button>
           </div>
-          <button type="button" className="auth-card__link" onClick={() => navigate('/signup')}>
-            이메일로 회원가입
-          </button>
-
           <form className="auth-card__dev" onSubmit={handleDevLogin}>
             <div className="auth-card__dev-label">개발용 로그인 (임시)</div>
             <div className="auth-form__row">

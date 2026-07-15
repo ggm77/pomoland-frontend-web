@@ -7,12 +7,54 @@ import { mapDtoToTiles } from '../lib/mapTransform'
 import type { Tile } from '../types'
 import './Map.css'
 
-const CAPTURE_COST = 3
 const DEFENSE_COST = 1
 const REFRESH_INTERVAL_MS = 10_000
 
 function formatClock(date: Date) {
   return date.toLocaleTimeString('ko-KR', { hour12: false })
+}
+
+function captureMinPoint(tile: Tile) {
+  return tile.state === 'other' ? (tile.defense ?? 0) + 1 : 1
+}
+
+function CaptureControl({
+  tile,
+  points,
+  onCapture,
+}: {
+  tile: Tile
+  points: number
+  onCapture: (point: number) => void
+}) {
+  const min = captureMinPoint(tile)
+  const [amount, setAmount] = useState(min)
+  const invalid = amount < min || amount > points
+
+  return (
+    <>
+      <div className="map-page__capture-form">
+        <label className="map-page__capture-label" htmlFor="capture-amount">
+          점령에 사용할 포인트 (최소 {min}P)
+        </label>
+        <div className="map-page__capture-row">
+          <input
+            id="capture-amount"
+            type="number"
+            min={min}
+            max={points}
+            className="input map-page__capture-input"
+            value={amount}
+            onChange={(event) => setAmount(Number(event.target.value))}
+          />
+          <div className="map-page__capture-balance">보유 {points}P</div>
+        </div>
+      </div>
+      <button type="button" className="btn btn--primary" disabled={invalid} onClick={() => onCapture(amount)}>
+        점령하기 ({amount}P)
+      </button>
+    </>
+  )
 }
 
 export default function Map() {
@@ -21,6 +63,7 @@ export default function Map() {
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
   const [points, setPoints] = useState(0)
   const [myUserId, setMyUserId] = useState<number | null>(null)
+  const [spawnKey, setSpawnKey] = useState<string | undefined>(undefined)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [ownerNames, setOwnerNames] = useState<Record<number, string>>({})
@@ -45,6 +88,7 @@ export default function Map() {
         if (cancelled) return
         setMyUserId(me.id)
         setPoints(me.point)
+        if (me.spawnPoint) setSpawnKey(`${me.spawnPoint.x},${me.spawnPoint.y}`)
         await refresh(me.id)
       } catch {
         if (!cancelled) setError('내 정보를 불러오지 못했습니다.')
@@ -73,10 +117,11 @@ export default function Map() {
       .catch(() => {})
   }, [selected, ownerNames])
 
-  async function handleCapture() {
-    if (!selected || !selected.capturable || points < CAPTURE_COST || myUserId === null) return
+  async function handleCapture(capturePoint: number) {
+    if (!selected || !selected.capturable || myUserId === null) return
+    if (capturePoint < captureMinPoint(selected) || capturePoint > points) return
     try {
-      await occupyTile(selected.col, selected.row, CAPTURE_COST)
+      await occupyTile(selected.col, selected.row, capturePoint)
       const me = await getMe()
       setPoints(me.point)
       await refresh(myUserId)
@@ -111,7 +156,13 @@ export default function Map() {
             </div>
           </div>
           {error && <div className="map-page__error">{error}</div>}
-          <TileGrid cols={cols} tiles={tiles} selectedKey={selectedKey ?? undefined} onTileClick={(tile) => setSelectedKey(tile.key)} />
+          <TileGrid
+            cols={cols}
+            tiles={tiles}
+            selectedKey={selectedKey ?? undefined}
+            centerKey={spawnKey}
+            onTileClick={(tile) => setSelectedKey(tile.key)}
+          />
           <div className="map-page__legend">
             <span>■ 내 영토</span>
             <span>■ 타 유저</span>
@@ -132,16 +183,11 @@ export default function Map() {
                       selected.state === 'mine'
                         ? '나'
                         : (ownerNames[Number(selected.owner)] ?? `유저 #${selected.owner}`)
-                    } · 방어력 ${selected.defense}`}
+                    } · ${selected.isSpawnPoint ? '스폰포인트' : `방어력 ${selected.defense}`}`}
               </div>
-              <button
-                type="button"
-                className="btn btn--primary"
-                disabled={!selected.capturable || points < CAPTURE_COST}
-                onClick={handleCapture}
-              >
-                점령하기 (필요 {CAPTURE_COST}P)
-              </button>
+              {selected.capturable && (
+                <CaptureControl key={selected.key} tile={selected} points={points} onCapture={handleCapture} />
+              )}
               <button
                 type="button"
                 className="btn btn--ghost"

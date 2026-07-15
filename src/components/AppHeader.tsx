@@ -28,7 +28,6 @@ export default function AppHeader() {
           ))}
         </nav>
       </div>
-      <div className="app-header__avatar" />
     </header>
   )
 }

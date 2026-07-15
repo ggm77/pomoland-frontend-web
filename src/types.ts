@@ -8,18 +8,20 @@ export interface Tile {
   capturable: boolean
   owner?: string
   defense?: number
+  isSpawnPoint: boolean
 }
 
-export interface RankingEntry {
-  rank: number
-  name: string
-  tiles: number
-  time: string
+export interface RankingItemDto {
+  id: number
+  username: string
+  tileCount: number
+  dailyStudyTime: number
+  weeklyStudyTime: number
+  point: number
 }
 
-export interface StatsBar {
-  label: string
-  minutes: number
+export interface RankingResponseDto {
+  items: RankingItemDto[]
 }
 
 export interface SessionDto {
@@ -58,7 +60,7 @@ export interface UserDto {
 
 export interface UserSettingsDto {
   studyTime: number
-  resetTime: number
+  restTime: number
 }
 
 export interface AuthTokens {

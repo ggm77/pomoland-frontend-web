@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import Login from './pages/Login'
-import Signup from './pages/Signup'
 import Onboarding from './pages/Onboarding'
 import Timer from './pages/Timer'
 import Map from './pages/Map'
@@ -22,7 +21,6 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
       <Route path="/oauth2/callback/google" element={<OAuthCallback provider="google" />} />
       <Route path="/oauth2/callback/apple" element={<OAuthCallback provider="apple" />} />
       <Route path="/onboarding" element={<Onboarding />} />

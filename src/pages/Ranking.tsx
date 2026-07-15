@@ -1,44 +1,76 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AppHeader from '../components/AppHeader'
-import { MORE_RANKING_LIST, MY_RANKING, RANKING_LIST } from '../lib/mockData'
+import { getRanking } from '../api/userApi'
+import type { RankingItemDto } from '../types'
 import './Ranking.css'
 
-export default function Ranking() {
-  const [list, setList] = useState(RANKING_LIST)
-  const [hasMore, setHasMore] = useState(true)
+type RankingType = 'time' | 'tile'
 
-  function handleLoadMore() {
-    setList((prev) => [...prev, ...MORE_RANKING_LIST])
-    setHasMore(false)
-  }
+function formatSeconds(totalSeconds: number) {
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  return `${hours}시간 ${minutes}분`
+}
+
+export default function Ranking() {
+  const [type, setType] = useState<RankingType>('time')
+  const [items, setItems] = useState<RankingItemDto[]>([])
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getRanking(type)
+      .then((res) => {
+        if (cancelled) return
+        setItems(res.items)
+        setUpdatedAt(new Date())
+        setError(null)
+      })
+      .catch(() => {
+        if (!cancelled) setError('랭킹 정보를 불러오지 못했습니다.')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [type])
 
   return (
     <div className="ranking-page">
       <AppHeader />
       <div className="ranking-page__body">
-        <div className="ranking-page__hint">랭킹 = 시즌 누적 완주 시간 + 보유 영토 크기 가중 합산</div>
-        <div className="ranking-page__me">
-          <span>내 순위 {MY_RANKING.rank}위</span>
-          <span>{MY_RANKING.name}</span>
-          <span>타일 {MY_RANKING.tiles}</span>
-          <span>{MY_RANKING.time}</span>
+        <div className="ranking-page__tabs">
+          <button
+            type="button"
+            className={'ranking-page__tab' + (type === 'time' ? ' ranking-page__tab--active' : '')}
+            onClick={() => setType('time')}
+          >
+            공부 시간순
+          </button>
+          <button
+            type="button"
+            className={'ranking-page__tab' + (type === 'tile' ? ' ranking-page__tab--active' : '')}
+            onClick={() => setType('tile')}
+          >
+            타일순
+          </button>
         </div>
+        {error && <div className="ranking-page__error">{error}</div>}
         <div className="ranking-page__list">
-          {list.map((entry) => (
-            <div key={entry.rank} className="ranking-page__row">
-              <span className="ranking-page__rank">{entry.rank}위</span>
-              <span className="ranking-page__name">{entry.name}</span>
-              <span className="ranking-page__tiles">타일 {entry.tiles}</span>
-              <span className="ranking-page__time">{entry.time}</span>
+          {items.map((entry, index) => (
+            <div key={entry.id} className="ranking-page__row">
+              <span className="ranking-page__rank">{index + 1}위</span>
+              <span className="ranking-page__name">{entry.username}</span>
+              <span className="ranking-page__tiles">타일 {entry.tileCount}</span>
+              <span className="ranking-page__time">{formatSeconds(entry.weeklyStudyTime)}</span>
             </div>
           ))}
         </div>
-        {hasMore && (
-          <button type="button" className="ranking-page__more" onClick={handleLoadMore}>
-            더보기
-          </button>
+        {updatedAt && (
+          <div className="ranking-page__updated">
+            마지막 갱신 {updatedAt.toLocaleTimeString('ko-KR', { hour12: false })}
+          </div>
         )}
-        <div className="ranking-page__updated">마지막 갱신 12:05:30</div>
       </div>
     </div>
   )

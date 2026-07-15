@@ -37,10 +37,3 @@
   background: var(--color-accent);
   color: #fff;
 }
-
-.app-header__avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--color-border);
-}

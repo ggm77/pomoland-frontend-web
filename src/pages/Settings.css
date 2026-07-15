@@ -77,37 +77,6 @@
   cursor: pointer;
 }
 
-.settings-page__toggle {
-  width: 46px;
-  height: 26px;
-  border-radius: 13px;
-  background: var(--color-border);
-  position: relative;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: background 0.2s ease;
-}
-
-.settings-page__toggle--on {
-  background: var(--color-accent);
-}
-
-.settings-page__toggle-knob {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  transition: left 0.2s ease;
-}
-
-.settings-page__toggle--on .settings-page__toggle-knob {
-  left: 23px;
-}
-
 .settings-page__logout {
   margin-top: 8px;
   padding: 14px;

@@ -12,6 +12,7 @@
 
 .map-page__main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -74,4 +75,34 @@
   width: 100%;
   padding: 12px;
   font-size: 14px;
+}
+
+.map-page__capture-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.map-page__capture-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.map-page__capture-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-page__capture-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.map-page__capture-balance {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-align: right;
 }

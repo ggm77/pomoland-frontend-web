@@ -63,17 +63,6 @@
   padding: 14px 40px;
 }
 
-.timer-page__notice {
-  width: 100%;
-  max-width: 760px;
-  padding: 12px 18px;
-  background: var(--color-notice-bg);
-  border: 1px solid var(--color-notice-border);
-  border-radius: 12px;
-  font-size: 13px;
-  color: var(--color-notice-text);
-}
-
 .timer-page__complete {
   width: 100%;
   max-width: 420px;

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TileGrid from '../components/TileGrid'
 import { getMapTiles } from '../api/mapApi'
-import { setSpawnPoint } from '../api/userApi'
+import { putMySettings, setSpawnPoint } from '../api/userApi'
 import { mapDtoToTiles } from '../lib/mapTransform'
 import type { Tile } from '../types'
 import './Onboarding.css'
@@ -12,6 +12,8 @@ export default function Onboarding() {
   const [tiles, setTiles] = useState<Tile[]>([])
   const [cols, setCols] = useState(0)
   const [selected, setSelected] = useState<Tile | null>(null)
+  const [studyTime, setStudyTime] = useState(25)
+  const [restTime, setRestTime] = useState(5)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -42,9 +44,10 @@ export default function Onboarding() {
     setError(null)
     try {
       await setSpawnPoint(selected.col, selected.row)
+      await putMySettings({ studyTime, restTime })
       navigate('/timer')
     } catch {
-      setError('스폰 포인트 설정에 실패했습니다.')
+      setError('설정 저장에 실패했습니다.')
       setSubmitting(false)
     }
   }
@@ -55,7 +58,7 @@ export default function Onboarding() {
         <div className="onboarding-card__steps">
           <span className="onboarding-card__step onboarding-card__step--active">STEP 1/2 첫 스폰 타일 선택</span>
           <span>·</span>
-          <span>STEP 2/2 목표 설정</span>
+          <span>STEP 2/2 세션 설정</span>
         </div>
         <div className="onboarding-card__body">
           <div className="onboarding-card__col">
@@ -83,20 +86,29 @@ export default function Onboarding() {
               </div>
             </div>
             <div>
-              <div className="onboarding-card__label">목표 공부 시간</div>
-              <div className="onboarding-card__goal-row">
-                <div className="onboarding-card__goal">
-                  일간 <b>4</b>시간
-                </div>
-                <div className="onboarding-card__goal">
-                  주간 <b>20</b>시간
-                </div>
-              </div>
-            </div>
-            <div>
               <div className="onboarding-card__label">세션 길이</div>
-              <div className="onboarding-card__goal">
-                집중 <b>25</b>분 + 휴식 <b>5</b>분
+              <div className="onboarding-card__session-row">
+                <label className="onboarding-card__session-field">
+                  <input
+                    type="number"
+                    min={1}
+                    className="input onboarding-card__session-input"
+                    value={studyTime}
+                    onChange={(event) => setStudyTime(Number(event.target.value))}
+                  />
+                  분 집중
+                </label>
+                <span>+</span>
+                <label className="onboarding-card__session-field">
+                  <input
+                    type="number"
+                    min={1}
+                    className="input onboarding-card__session-input"
+                    value={restTime}
+                    onChange={(event) => setRestTime(Number(event.target.value))}
+                  />
+                  분 휴식
+                </label>
               </div>
             </div>
             {error && <div className="onboarding-card__error">{error}</div>}

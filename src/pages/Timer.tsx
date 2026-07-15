@@ -53,7 +53,7 @@ export default function Timer() {
     getMySettings()
       .then((settings) => {
         const focus = settings.studyTime * 60
-        const rest = settings.resetTime * 60
+        const rest = settings.restTime * 60
         setFocusSeconds(focus)
         setBreakSeconds(rest)
         setSecondsLeft((prev) => (prev === DEFAULT_FOCUS_SECONDS ? focus : prev))
@@ -145,8 +145,6 @@ export default function Timer() {
     setRunning(true)
   }
 
-  const goalProgress = Math.round((cycleSession / TOTAL_SESSIONS) * 100)
-
   return (
     <div className="timer-page">
       <AppHeader />
@@ -157,9 +155,6 @@ export default function Timer() {
           </span>
           <span>
             보유 <b>{points}P</b>
-          </span>
-          <span>
-            목표 대비 <b>{goalProgress}%</b>
           </span>
         </div>
         <div className="timer-page__dial">
@@ -176,9 +171,6 @@ export default function Timer() {
           <button type="button" className="btn btn--outline" onClick={handleGiveUp}>
             포기
           </button>
-        </div>
-        <div className="timer-page__notice">
-          화면 이탈 감지 — 허용 시간 초과 시 이번 세션은 무효 처리됩니다.
         </div>
 
         {showComplete && (

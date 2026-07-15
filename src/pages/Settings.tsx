@@ -10,12 +10,11 @@ export default function Settings() {
   const [nickname, setNickname] = useState('')
   const [editingNickname, setEditingNickname] = useState(false)
   const [draftNickname, setDraftNickname] = useState('')
-  const [stealAlert, setStealAlert] = useState(true)
   const [studyTime, setStudyTime] = useState(25)
-  const [resetTime, setResetTime] = useState(5)
+  const [restTime, setRestTime] = useState(5)
   const [editingSession, setEditingSession] = useState(false)
   const [draftStudyTime, setDraftStudyTime] = useState(25)
-  const [draftResetTime, setDraftResetTime] = useState(5)
+  const [draftRestTime, setDraftRestTime] = useState(5)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export default function Settings() {
     getMySettings()
       .then((settings) => {
         setStudyTime(settings.studyTime)
-        setResetTime(settings.resetTime)
+        setRestTime(settings.restTime)
       })
       .catch(() => setError('설정 정보를 불러오지 못했습니다.'))
   }, [])
@@ -49,9 +48,9 @@ export default function Settings() {
   async function handleSessionSubmit(event: FormEvent) {
     event.preventDefault()
     try {
-      const settings = await putMySettings({ studyTime: draftStudyTime, resetTime: draftResetTime })
+      const settings = await putMySettings({ studyTime: draftStudyTime, restTime: draftRestTime })
       setStudyTime(settings.studyTime)
-      setResetTime(settings.resetTime)
+      setRestTime(settings.restTime)
       setEditingSession(false)
     } catch {
       setError('세션 길이 변경에 실패했습니다.')
@@ -112,11 +111,6 @@ export default function Settings() {
         </div>
 
         <div className="settings-page__card">
-          <div className="settings-page__row-label">목표 공부 시간</div>
-          <div className="settings-page__row-value">일간 4시간 / 주간 20시간</div>
-        </div>
-
-        <div className="settings-page__card">
           <div className="settings-page__row-label">세션 길이</div>
           {editingSession ? (
             <form className="settings-page__edit-form" onSubmit={handleSessionSubmit}>
@@ -132,8 +126,8 @@ export default function Settings() {
                 type="number"
                 min={1}
                 className="input settings-page__edit-input"
-                value={draftResetTime}
-                onChange={(event) => setDraftResetTime(Number(event.target.value))}
+                value={draftRestTime}
+                onChange={(event) => setDraftRestTime(Number(event.target.value))}
               />
               <span>분 휴식</span>
               <button type="submit" className="settings-page__save-btn">
@@ -142,7 +136,7 @@ export default function Settings() {
             </form>
           ) : (
             <div className="settings-page__row-value">
-              집중 {studyTime}분 + 휴식 {resetTime}분
+              집중 {studyTime}분 + 휴식 {restTime}분
             </div>
           )}
           <button
@@ -150,25 +144,13 @@ export default function Settings() {
             className="settings-page__change-btn"
             onClick={() => {
               setDraftStudyTime(studyTime)
-              setDraftResetTime(resetTime)
+              setDraftRestTime(restTime)
               setEditingSession((prev) => !prev)
             }}
           >
             {editingSession ? '취소' : '변경'}
           </button>
           <div className="settings-page__note">※ 커스텀 길이도 포인트는 25분 기준으로 환산됩니다.</div>
-        </div>
-
-        <div className="settings-page__row">
-          <div className="settings-page__row-value">내 타일 피탈 알림</div>
-          <button
-            type="button"
-            className={'settings-page__toggle' + (stealAlert ? ' settings-page__toggle--on' : '')}
-            onClick={() => setStealAlert((prev) => !prev)}
-            aria-pressed={stealAlert}
-          >
-            <span className="settings-page__toggle-knob" />
-          </button>
         </div>
 
         <button type="button" className="settings-page__logout" onClick={handleLogout}>

@@ -19,22 +19,12 @@
   padding: 48px 24px;
 }
 
-.auth-card--tall {
-  align-items: flex-start;
-}
-
 .auth-card__inner {
   width: 400px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 28px;
-}
-
-.auth-card__inner--form {
-  width: 420px;
-  align-items: stretch;
-  gap: 16px;
 }
 
 .auth-card__brand {
@@ -60,12 +50,6 @@
   font-weight: 900;
 }
 
-.auth-card__heading {
-  font-size: 22px;
-  font-weight: 900;
-  margin-bottom: 4px;
-}
-
 .auth-card__desc {
   margin: 0;
   font-size: 14px;
@@ -80,15 +64,6 @@
   gap: 10px;
 }
 
-.auth-card__link {
-  border: none;
-  background: none;
-  color: var(--color-accent);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
 .auth-form__row {
   display: flex;
   gap: 8px;
@@ -96,32 +71,6 @@
 
 .auth-form__row .input {
   flex: 1;
-}
-
-.auth-form__field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.auth-form__hint {
-  font-size: 12px;
-  color: var(--color-text-muted);
-  padding-left: 2px;
-}
-
-.auth-form__checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-}
-
-.auth-form__checkbox input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-accent);
 }
 
 .auth-card__dev {
@@ -144,16 +93,4 @@
 .auth-card__dev-error {
   font-size: 12px;
   color: #d64545;
-}
-
-.btn--check {
-  padding: 0 16px;
-  border-radius: 12px;
-  border: 1px solid var(--color-input-border);
-  background: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--color-accent-label);
-  cursor: pointer;
-  white-space: nowrap;
 }
