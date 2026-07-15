@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { loginWithApple, loginWithGoogle } from '../api/authApi'
-import { getMe } from '../api/userApi'
 import { consumeOAuthState } from '../lib/oauth'
-import { setStoredTokens } from '../lib/tokenStorage'
+import { completeLogin } from '../lib/postLogin'
 import './Auth.css'
 
 interface OAuthCallbackProps {
@@ -54,13 +53,7 @@ export default function OAuthCallback({ provider }: OAuthCallbackProps) {
           provider === 'google'
             ? await loginWithGoogle(code)
             : await loginWithApple(code, extractAppleName(searchParams))
-        setStoredTokens(tokens)
-        try {
-          const me = await getMe()
-          navigate(me.spawnPoint ? '/timer' : '/onboarding', { replace: true })
-        } catch {
-          navigate('/onboarding', { replace: true })
-        }
+        await completeLogin(tokens, navigate)
       } catch {
         setError('로그인에 실패했습니다.')
       }

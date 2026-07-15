@@ -124,6 +124,28 @@
   accent-color: var(--color-accent);
 }
 
+.auth-card__dev {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  border: 1px dashed var(--color-input-border);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auth-card__dev-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.auth-card__dev-error {
+  font-size: 12px;
+  color: #d64545;
+}
+
 .btn--check {
   padding: 0 16px;
   border-radius: 12px;
