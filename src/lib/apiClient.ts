@@ -61,7 +61,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const { method = 'GET', body, auth = true } = options
   let response = await sendRequest(path, method, body, auth)
 
-  if (response.status === 401 && auth && path !== REFRESH_PATH) {
+  if ((response.status === 401 || response.status === 403) && auth && path !== REFRESH_PATH) {
     try {
       refreshPromise ??= refreshAccessToken().finally(() => {
         refreshPromise = null
@@ -69,14 +69,14 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       await refreshPromise
       response = await sendRequest(path, method, body, auth)
     } catch {
-      // fall through to the 401 handling below
+      // fall through to the 401/403 handling below
     }
   }
 
-  if (response.status === 401) {
+  if (response.status === 401 || response.status === 403) {
     clearStoredTokens()
     onUnauthorized?.()
-    throw new ApiError(401, 'Unauthorized')
+    throw new ApiError(response.status, response.status === 401 ? 'Unauthorized' : 'Forbidden')
   }
 
   if (!response.ok) {
