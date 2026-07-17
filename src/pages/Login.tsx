@@ -1,8 +1,4 @@
-import { useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { devLogin } from '../api/authApi'
 import { startAppleLogin, startGoogleLogin } from '../lib/oauth'
-import { completeLogin } from '../lib/postLogin'
 import './Auth.css'
 
 function GoogleIcon() {
@@ -44,26 +40,6 @@ function AppleIcon() {
 }
 
 export default function Login() {
-  const navigate = useNavigate()
-  const [devUserId, setDevUserId] = useState('')
-  const [devLoading, setDevLoading] = useState(false)
-  const [devError, setDevError] = useState<string | null>(null)
-
-  async function handleDevLogin(event: FormEvent) {
-    event.preventDefault()
-    const userId = Number(devUserId)
-    if (!Number.isInteger(userId) || userId <= 0) return
-    setDevLoading(true)
-    setDevError(null)
-    try {
-      const tokens = await devLogin(userId)
-      await completeLogin(tokens, navigate)
-    } catch {
-      setDevError('개발용 로그인에 실패했습니다.')
-      setDevLoading(false)
-    }
-  }
-
   return (
     <div className="auth-page">
       <div className="auth-card">
@@ -89,22 +65,6 @@ export default function Login() {
               <span>Apple로 로그인</span>
             </button>
           </div>
-          <form className="auth-card__dev" onSubmit={handleDevLogin}>
-            <div className="auth-card__dev-label">개발용 로그인 (임시)</div>
-            <div className="auth-form__row">
-              <input
-                className="input"
-                placeholder="userId"
-                inputMode="numeric"
-                value={devUserId}
-                onChange={(event) => setDevUserId(event.target.value)}
-              />
-              <button type="submit" className="btn btn--outline" disabled={!devUserId || devLoading}>
-                {devLoading ? '로그인 중...' : '개발용 로그인'}
-              </button>
-            </div>
-            {devError && <div className="auth-card__dev-error">{devError}</div>}
-          </form>
         </div>
       </div>
     </div>
