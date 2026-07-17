@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import TileGrid from '../components/TileGrid'
 import { getMapTiles } from '../api/mapApi'
-import { putMySettings, setSpawnPoint } from '../api/userApi'
+import { getMe, putMySettings, setSpawnPoint } from '../api/userApi'
 import { mapDtoToTiles } from '../lib/mapTransform'
 import type { Tile } from '../types'
 import './Onboarding.css'
@@ -41,6 +41,22 @@ export default function Onboarding() {
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    // 이미 스폰포인트가 있는 기존 유저가(뒤로가기, 직접 접근 등으로) 온보딩에 들어오면
+    // 스폰 재설정·세션 길이 초기화를 막기 위해 /timer로 돌려보낸다.
+    getMe()
+      .then((me) => {
+        if (!cancelled && me.spawnPoint) navigate('/timer', { replace: true })
+      })
+      .catch(() => {
+        // 조회 실패는 무시 — 신규 유저일 수 있으므로 온보딩 진행을 막지 않는다
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [navigate])
+
   function handleTileClick(tile: Tile) {
     if (tile.state !== 'empty') return
     setSelected(tile)
@@ -63,11 +79,7 @@ export default function Onboarding() {
   return (
     <div className="onboarding-page">
       <div className="onboarding-card">
-        <div className="onboarding-card__steps">
-          <span className="onboarding-card__step onboarding-card__step--active">STEP 1/2 첫 스폰 타일 선택</span>
-          <span>·</span>
-          <span>STEP 2/2 세션 설정</span>
-        </div>
+        <div className="onboarding-card__intro">환영해요! 첫 스폰 타일을 고르고 세션 길이를 설정하면 바로 시작할 수 있어요.</div>
         <div className="onboarding-card__body">
           <div className="onboarding-card__col">
             <div className="onboarding-card__label">공유 맵 미리보기</div>
@@ -94,8 +106,8 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="onboarding-card__col">
+            <div className="onboarding-card__label">선택 타일</div>
             <div className="onboarding-card__selected">
-              <div className="onboarding-card__selected-label">선택 타일</div>
               <div className="onboarding-card__selected-value">
                 {selected
                   ? `좌표 (${selected.col}, ${selected.row}) · 빈 타일 — 선택 가능`

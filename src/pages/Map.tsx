@@ -113,8 +113,34 @@ export default function Map() {
 
   useEffect(() => {
     if (myUserId === null) return
-    const timer = window.setInterval(() => refresh(myUserId), REFRESH_INTERVAL_MS)
-    return () => window.clearInterval(timer)
+    const userId = myUserId
+    let timer: number | null = null
+
+    function stopPolling() {
+      if (timer !== null) {
+        window.clearInterval(timer)
+        timer = null
+      }
+    }
+    function startPolling() {
+      if (timer !== null) return
+      timer = window.setInterval(() => refresh(userId), REFRESH_INTERVAL_MS)
+    }
+    function handleVisibilityChange() {
+      if (document.hidden) {
+        stopPolling()
+      } else {
+        refresh(userId)
+        startPolling()
+      }
+    }
+
+    if (!document.hidden) startPolling()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      stopPolling()
+    }
   }, [myUserId, refresh])
 
   const selected = tiles.find((tile) => tile.key === selectedKey) ?? null
@@ -133,24 +159,37 @@ export default function Map() {
     if (capturePoint < captureMinPoint(selected) || capturePoint > points) return
     try {
       await occupyTile(selected.col, selected.row, capturePoint)
-      const me = await getMe()
-      setPoints(me.point)
-      await refresh(myUserId)
     } catch {
       setError('점령에 실패했습니다.')
+      return
     }
+    setError(null)
+    // 점령 자체는 성공했으므로, 뒤따르는 조회 실패로 "점령 실패"를 오표시하지 않는다.
+    try {
+      const me = await getMe()
+      setPoints(me.point)
+    } catch {
+      // 포인트 갱신 실패는 무시 — 다음 폴링/새로고침에서 반영된다
+    }
+    await refresh(myUserId)
   }
 
   async function handleDefenseUp() {
     if (!selected || selected.state !== 'mine' || points < DEFENSE_COST || myUserId === null) return
     try {
       await defenseTile(selected.col, selected.row, DEFENSE_COST)
-      const me = await getMe()
-      setPoints(me.point)
-      await refresh(myUserId)
     } catch {
       setError('방어력 강화에 실패했습니다.')
+      return
     }
+    setError(null)
+    try {
+      const me = await getMe()
+      setPoints(me.point)
+    } catch {
+      // 포인트 갱신 실패는 무시 — 다음 폴링/새로고침에서 반영된다
+    }
+    await refresh(myUserId)
   }
 
   return (
@@ -211,7 +250,7 @@ export default function Map() {
                   : `소유자: ${
                       selected.state === 'mine'
                         ? '나'
-                        : (ownerNames[Number(selected.owner)] ?? `유저 #${selected.owner}`)
+                        : (ownerNames[Number(selected.owner)] || `유저 #${selected.owner}`)
                     } · ${selected.isSpawnPoint ? '스폰포인트' : `방어력 ${selected.defense}`}`}
               </div>
               {selected.capturable && (

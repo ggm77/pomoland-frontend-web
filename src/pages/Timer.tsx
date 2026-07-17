@@ -9,6 +9,9 @@ const DEFAULT_FOCUS_SECONDS = 25 * 60
 const DEFAULT_BREAK_SECONDS = 5 * 60
 const HEARTBEAT_INTERVAL_MS = 15_000
 const AWAY_ABANDON_MS = 5_000
+const COMPLETE_RETRY_ATTEMPTS = 3
+const COMPLETE_RETRY_BASE_DELAY_MS = 1_000
+const HEARTBEAT_WARNING_THRESHOLD = 3
 
 type Phase = 'focus' | 'break'
 
@@ -19,6 +22,24 @@ function formatTime(totalSeconds: number) {
   const minutes = Math.floor(totalSeconds / 60)
   const seconds = totalSeconds % 60
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+// 세션 완료 요청은 일시적인 네트워크 단절로 실패할 수 있어 몇 차례 재시도한다.
+// 그래도 실패하면 사용자에게 별도 재시도 UI 없이 에러만 알린다(서버가 하트비트 타임아웃으로 정리).
+async function completeSessionWithRetry(uuid: string, attempts = COMPLETE_RETRY_ATTEMPTS) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      await completeSession(uuid)
+      return true
+    } catch {
+      if (attempt < attempts - 1) await delay(COMPLETE_RETRY_BASE_DELAY_MS * 2 ** attempt)
+    }
+  }
+  return false
 }
 
 export default function Timer() {
@@ -33,6 +54,7 @@ export default function Timer() {
   const [showComplete, setShowComplete] = useState(false)
   const [sessionUuid, setSessionUuid] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [heartbeatWarning, setHeartbeatWarning] = useState(false)
   const [hidden, setHidden] = useState(document.hidden)
   const [needsUsername, setNeedsUsername] = useState(false)
   const [usernameDraft, setUsernameDraft] = useState('')
@@ -40,6 +62,7 @@ export default function Timer() {
   const [usernameError, setUsernameError] = useState<string | null>(null)
   const intervalRef = useRef<number | null>(null)
   const heartbeatRef = useRef<number | null>(null)
+  const heartbeatFailuresRef = useRef(0)
   const phaseEndAtRef = useRef<number | null>(null)
 
   const refreshMe = useCallback(async () => {
@@ -116,8 +139,18 @@ export default function Timer() {
 
   useEffect(() => {
     if (!running || phase !== 'focus' || !sessionUuid || hidden) return
+    heartbeatFailuresRef.current = 0
+    setHeartbeatWarning(false)
     heartbeatRef.current = window.setInterval(() => {
-      heartbeatSession(sessionUuid).catch(() => {})
+      heartbeatSession(sessionUuid)
+        .then(() => {
+          heartbeatFailuresRef.current = 0
+          setHeartbeatWarning(false)
+        })
+        .catch(() => {
+          heartbeatFailuresRef.current += 1
+          if (heartbeatFailuresRef.current >= HEARTBEAT_WARNING_THRESHOLD) setHeartbeatWarning(true)
+        })
     }, HEARTBEAT_INTERVAL_MS)
     return () => {
       if (heartbeatRef.current !== null) window.clearInterval(heartbeatRef.current)
@@ -129,10 +162,15 @@ export default function Timer() {
     if (phase === 'focus') {
       const finishingUuid = sessionUuid
       setSessionUuid(null)
+      setHeartbeatWarning(false)
       if (finishingUuid) {
-        completeSession(finishingUuid)
-          .then(() => refreshMe())
-          .catch(() => setError('세션 완료 처리에 실패했습니다.'))
+        completeSessionWithRetry(finishingUuid).then((succeeded) => {
+          if (succeeded) {
+            refreshMe()
+          } else {
+            setError('세션 완료 처리에 실패했습니다.')
+          }
+        })
       }
       setShowComplete(true)
       setPhase('break')
@@ -152,11 +190,14 @@ export default function Timer() {
         setError(null)
         const session = await startSession()
         setSessionUuid(session.sessionUuid)
-        const totalSeconds = Math.round(
+        const rawTotalSeconds = Math.round(
           (new Date(session.endAt).getTime() - new Date(session.startAt).getTime()) / 1000,
         )
-        setSecondsLeft(totalSeconds > 0 ? totalSeconds : focusSeconds)
-        phaseEndAtRef.current = new Date(session.endAt).getTime()
+        const totalSeconds = Number.isFinite(rawTotalSeconds) && rawTotalSeconds > 0 ? rawTotalSeconds : focusSeconds
+        setSecondsLeft(totalSeconds)
+        // 서버가 준 구간 길이(endAt-startAt)만 신뢰하고, 만료 시각은 클라이언트 시계 기준으로 다시 계산해
+        // 클라이언트-서버 시계 오차가 타이머 조기/지연 종료로 이어지지 않게 한다.
+        phaseEndAtRef.current = Date.now() + totalSeconds * 1000
       } catch {
         setError('세션 시작에 실패했습니다.')
         return
@@ -242,6 +283,9 @@ export default function Timer() {
           <div className="timer-page__phase">{phase === 'focus' ? '집중 중' : '휴식 중'}</div>
         </div>
         {error && <div className="timer-page__error">{error}</div>}
+        {heartbeatWarning && (
+          <div className="timer-page__error">연결이 불안정합니다 — 세션 기록이 저장되지 않을 수 있어요.</div>
+        )}
         <div className="timer-page__actions">
           <button type="button" className="btn btn--primary" onClick={handleStart} disabled={running}>
             시작
