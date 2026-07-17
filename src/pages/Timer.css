@@ -141,6 +141,49 @@
   font-size: 14px;
 }
 
+.timer-page__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.timer-page__modal {
+  width: 100%;
+  max-width: 360px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: var(--shadow-pop);
+}
+
+.timer-page__modal-title {
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.timer-page__modal-desc {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.timer-page__modal-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.timer-page__modal-form .input {
+  flex: 1;
+}
+
 @media (max-width: 640px) {
   .timer-page__body {
     padding: 20px 16px;

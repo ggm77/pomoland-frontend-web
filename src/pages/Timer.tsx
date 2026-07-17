@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AppHeader from '../components/AppHeader'
 import { abandonSession, completeSession, heartbeatSession, startSession } from '../api/sessionApi'
-import { getMe, getMySettings } from '../api/userApi'
+import { getMe, getMySettings, updateMe } from '../api/userApi'
 import './Timer.css'
 
 const DEFAULT_FOCUS_SECONDS = 25 * 60
@@ -34,6 +34,10 @@ export default function Timer() {
   const [sessionUuid, setSessionUuid] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [hidden, setHidden] = useState(document.hidden)
+  const [needsUsername, setNeedsUsername] = useState(false)
+  const [usernameDraft, setUsernameDraft] = useState('')
+  const [usernameSaving, setUsernameSaving] = useState(false)
+  const [usernameError, setUsernameError] = useState<string | null>(null)
   const intervalRef = useRef<number | null>(null)
   const heartbeatRef = useRef<number | null>(null)
   const phaseEndAtRef = useRef<number | null>(null)
@@ -43,10 +47,27 @@ export default function Timer() {
       const me = await getMe()
       setPoints(me.point)
       setCompletedToday(me.pomoComplete)
+      setNeedsUsername(!me.username?.trim())
     } catch {
       // best-effort refresh; keep last known values
     }
   }, [])
+
+  async function handleUsernameSubmit(event: FormEvent) {
+    event.preventDefault()
+    const next = usernameDraft.trim()
+    if (!next) return
+    setUsernameSaving(true)
+    setUsernameError(null)
+    try {
+      await updateMe(next)
+      setNeedsUsername(false)
+    } catch {
+      setUsernameError('닉네임 변경에 실패했습니다.')
+    } finally {
+      setUsernameSaving(false)
+    }
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- refreshMe awaits before touching state
@@ -250,6 +271,28 @@ export default function Timer() {
           </div>
         )}
       </div>
+
+      {needsUsername && (
+        <div className="timer-page__modal-backdrop">
+          <div className="timer-page__modal">
+            <div className="timer-page__modal-title">닉네임을 설정해주세요</div>
+            <div className="timer-page__modal-desc">랭킹과 맵에 표시할 닉네임이 아직 없어요.</div>
+            <form className="timer-page__modal-form" onSubmit={handleUsernameSubmit}>
+              <input
+                className="input"
+                value={usernameDraft}
+                onChange={(event) => setUsernameDraft(event.target.value)}
+                placeholder="닉네임"
+                autoFocus
+              />
+              <button type="submit" className="btn btn--primary" disabled={!usernameDraft.trim() || usernameSaving}>
+                {usernameSaving ? '저장 중...' : '저장'}
+              </button>
+            </form>
+            {usernameError && <div className="timer-page__error">{usernameError}</div>}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
