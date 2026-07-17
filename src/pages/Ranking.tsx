@@ -1,29 +1,49 @@
 import { useEffect, useState } from 'react'
 import AppHeader from '../components/AppHeader'
-import { getRanking } from '../api/userApi'
-import type { RankingItemDto } from '../types'
+import { getDailyRanking, getPointRanking, getTileRanking, getWeeklyRanking } from '../api/rankingApi'
+import type { RankingEntryDto } from '../types'
 import './Ranking.css'
 
-type RankingType = 'time' | 'tile'
+type RankingType = 'daily' | 'weekly' | 'tiles' | 'points'
 
-function formatMinutes(totalMinutes: number) {
+const TABS: { type: RankingType; label: string }[] = [
+  { type: 'daily', label: '일간' },
+  { type: 'weekly', label: '주간' },
+  { type: 'tiles', label: '타일순' },
+  { type: 'points', label: '포인트순' },
+]
+
+function fetchRanking(type: RankingType) {
+  switch (type) {
+    case 'daily':
+      return getDailyRanking()
+    case 'weekly':
+      return getWeeklyRanking()
+    case 'tiles':
+      return getTileRanking()
+    case 'points':
+      return getPointRanking()
+  }
+}
+
+function formatDuration(totalMinutes: number) {
   const hours = Math.floor(totalMinutes / 60)
   const minutes = totalMinutes % 60
   return `${hours}시간 ${minutes}분`
 }
 
 export default function Ranking() {
-  const [type, setType] = useState<RankingType>('time')
-  const [items, setItems] = useState<RankingItemDto[]>([])
+  const [type, setType] = useState<RankingType>('daily')
+  const [items, setItems] = useState<RankingEntryDto[]>([])
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    getRanking(type)
+    fetchRanking(type)
       .then((res) => {
         if (cancelled) return
-        setItems(res.items)
+        setItems(res)
         setUpdatedAt(new Date())
         setError(null)
       })
@@ -40,29 +60,26 @@ export default function Ranking() {
       <AppHeader />
       <div className="ranking-page__body">
         <div className="ranking-page__tabs">
-          <button
-            type="button"
-            className={'ranking-page__tab' + (type === 'time' ? ' ranking-page__tab--active' : '')}
-            onClick={() => setType('time')}
-          >
-            공부 시간순
-          </button>
-          <button
-            type="button"
-            className={'ranking-page__tab' + (type === 'tile' ? ' ranking-page__tab--active' : '')}
-            onClick={() => setType('tile')}
-          >
-            타일순
-          </button>
+          {TABS.map((tab) => (
+            <button
+              key={tab.type}
+              type="button"
+              className={'ranking-page__tab' + (type === tab.type ? ' ranking-page__tab--active' : '')}
+              onClick={() => setType(tab.type)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
         {error && <div className="ranking-page__error">{error}</div>}
         <div className="ranking-page__list">
-          {items.map((entry, index) => (
-            <div key={entry.id} className="ranking-page__row">
-              <span className="ranking-page__rank">{index + 1}위</span>
+          {items.map((entry) => (
+            <div key={entry.userId} className="ranking-page__row">
+              <span className="ranking-page__rank">{entry.rank}위</span>
               <span className="ranking-page__name">{entry.username}</span>
               <span className="ranking-page__tiles">타일 {entry.tileCount}</span>
-              <span className="ranking-page__time">{formatMinutes(entry.weeklyStudyTime)}</span>
+              <span className="ranking-page__points">{entry.point}P</span>
+              <span className="ranking-page__time">{formatDuration(entry.studyTime)}</span>
             </div>
           ))}
         </div>

@@ -11,17 +11,13 @@ export interface Tile {
   isSpawnPoint: boolean
 }
 
-export interface RankingItemDto {
-  id: number
+export interface RankingEntryDto {
+  rank: number
+  userId: number
   username: string
+  studyTime: number
   tileCount: number
-  dailyStudyTime: number
-  weeklyStudyTime: number
   point: number
-}
-
-export interface RankingResponseDto {
-  items: RankingItemDto[]
 }
 
 export interface SessionDto {

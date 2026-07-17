@@ -1,5 +1,5 @@
 import { apiRequest } from '../lib/apiClient'
-import type { RankingResponseDto, UserDto, UserSettingsDto } from '../types'
+import type { UserDto, UserSettingsDto } from '../types'
 
 export function getUser(userId: number) {
   return apiRequest<UserDto>(`/api/v1/users/${userId}`)
@@ -30,8 +30,4 @@ export function putMySettings(settings: UserSettingsDto) {
     method: 'PUT',
     body: settings,
   })
-}
-
-export function getRanking(type: 'time' | 'tile') {
-  return apiRequest<RankingResponseDto>(`/api/v1/users/ranking?type=${type}`)
 }

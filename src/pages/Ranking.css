@@ -13,6 +13,7 @@
 
 .ranking-page__tabs {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -75,6 +76,12 @@
 
 .ranking-page__tiles {
   color: var(--color-text-muted);
+}
+
+.ranking-page__points {
+  color: var(--color-text-muted);
+  width: 70px;
+  text-align: right;
 }
 
 .ranking-page__time {
