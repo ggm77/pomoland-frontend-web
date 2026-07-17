@@ -122,7 +122,7 @@ export default function Map() {
   useEffect(() => {
     if (!selected || selected.state !== 'other' || !selected.owner) return
     const ownerId = Number(selected.owner)
-    if (Number.isNaN(ownerId) || ownerNames[ownerId]) return
+    if (Number.isNaN(ownerId) || ownerId in ownerNames) return
     getUser(ownerId)
       .then((user) => setOwnerNames((prev) => ({ ...prev, [ownerId]: user.username })))
       .catch(() => {})
