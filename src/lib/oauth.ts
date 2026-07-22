@@ -22,7 +22,8 @@ export function startGoogleLogin() {
     response_type: 'code',
     scope: 'openid email profile',
     state,
-    prompt: 'select_account',
+    access_type: 'offline',
+    prompt: 'consent select_account',
   })
   window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`
 }
